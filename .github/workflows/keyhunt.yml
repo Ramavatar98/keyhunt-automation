@@ -19,17 +19,18 @@ jobs:
           cd keyhunt-
           make legacy
 
-      - name: Run KeyHunt and Capture Output
+      - name: Run KeyHunt and Check for Private Key
         run: |
           cd keyhunt-
           ./keyhunt -m address -f tests/66.txt -b 66 -l compress -q -s 10 | tee ../keyhunt_output.log
 
-      - name: Check for Private Key Hit and Push
-        run: |
-          if grep -q "Hit! Private Key:" keyhunt_output.log; then
+          # Check if Key Found
+          if grep -q "Hit! Private Key:" ../keyhunt_output.log; then
             echo "Key Found! Saving..."
             TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
-            grep "Hit! Private Key:" keyhunt_output.log | while read -r line; do
+            
+            # Extract and Save Key
+            grep "Hit! Private Key:" ../keyhunt_output.log | while read -r line; do
               echo "[$TIMESTAMP] $line" >> found_keys.log
             done
 
@@ -41,9 +42,9 @@ jobs:
             git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
 
             # Send Email Notification
-            echo "New Key Found: $(grep 'Hit! Private Key:' keyhunt_output.log)" | mail -s "New Key Found!" g98655545@gmail.com
+            echo "New Key Found: $(grep 'Hit! Private Key:' ../keyhunt_output.log)" | mail -s "New Key Found!" g98655545@gmail.com
             
             # Clean Up
-            rm keyhunt_output.log
+            rm ../keyhunt_output.log
           fi
           
