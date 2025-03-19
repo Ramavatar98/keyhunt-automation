@@ -22,6 +22,8 @@ jobs:
 
       - name: Run KeyHunt
         run: |
+           cd keyhunt-automation
+           
           ./keyhunt -m address  -f tests/66.txt -b 66 -l compress -q -s 10
 
       - name: Check for KeyFound
