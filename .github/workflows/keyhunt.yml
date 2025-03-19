@@ -21,27 +21,30 @@ jobs:
 
       - name: Run KeyHunt
         run: |
-           cd keyhunt-
-           
-           ./keyhunt -m address  -f tests/66.txt -b 66 -l compress -q -s 10
+          cd keyhunt-
+          ./keyhunt -m address -f tests/66.txt -b 66 -l compress -q -s 10
 
-      - name: Check for KeyFound
+      - name: Check for KeyFound and Push
         run: |
-          if [ -f KEYFOUNDKEYFOUND.txt ]; then
+          if [ -f keyhunt-/KEYFOUNDKEYFOUND.txt ]; then
             echo "Key Found! Saving..."
             TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
-            echo "[$TIMESTAMP] $(cat KEYFOUNDKEYFOUND.txt)" >> found_keys.log
+            echo "[$TIMESTAMP] $(cat keyhunt-/KEYFOUNDKEYFOUND.txt)" >> found_keys.log
+            
+            # Move file to root directory
+            mv keyhunt-/KEYFOUNDKEYFOUND.txt .
 
-            # Commit Data
+            # Git Setup & Commit
             git config --global user.name "GitHub Actions"
             git config --global user.email "actions@github.com"
-            git add found_keys.log
+            git add found_keys.log KEYFOUNDKEYFOUND.txt
             git commit -m "New key found on $TIMESTAMP"
-            git push
+            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
 
             # Send Email Notification
             echo "New Key Found: $(cat KEYFOUNDKEYFOUND.txt)" | mail -s "New Key Found!" g98655545@gmail.com
-
+            
+            # Clean Up
             rm KEYFOUNDKEYFOUND.txt
           fi
           
