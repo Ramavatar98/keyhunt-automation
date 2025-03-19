@@ -23,7 +23,7 @@ jobs:
       - name: Run KeyHunt
         run: |
           cd keyhunt
-          ./keyhunt -m bsgs -f ../pubkeys.txt -r 1:FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
+          ./keyhunt -m address  -f tests/66.txt -b 66 -l compress -q -s 10
 
       - name: Check for KeyFound
         run: |
@@ -40,7 +40,7 @@ jobs:
             git push
 
             # Send Email Notification
-            echo "New Key Found: $(cat KEYFOUNDKEYFOUND.txt)" | mail -s "New Key Found!" your-email@gmail.com
+            echo "New Key Found: $(cat KEYFOUNDKEYFOUND.txt)" | mail -s "New Key Found!" g98655545@gmail.com
 
             rm KEYFOUNDKEYFOUND.txt
           fi
