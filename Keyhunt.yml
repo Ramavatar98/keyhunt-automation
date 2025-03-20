@@ -1,0 +1,49 @@
+name: KeyHunt Automation
+
+on:
+  workflow_dispatch:  # Manually Run
+  push:
+    branches:
+      - main
+
+jobs:
+  run-keyhunt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          git clone https://github.com/Ramavatar98/keyhunt-.git
+          cd keyhunt-
+          make legacy
+
+      - name: Run KeyHunt and Check for Private Key
+        run: |
+          cd keyhunt-
+          ./keyhunt -m bsgs -f tests/125.txt -b 135 -k 512 -q -t 8 -s 10 -S | tee ../keyhunt_output.log
+
+          # Check if Key Found
+          if grep -q "Hit! Private Key:" ../keyhunt_output.log; then
+            echo "Key Found! Saving..."
+            TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
+            
+            # Extract and Save Key
+            grep "Hit! Private Key:" ../keyhunt_output.log | while read -r line; do
+              echo "[$TIMESTAMP] $line" >> found_keys.log
+            done
+
+            # Git Setup & Commit
+            git config --global user.name "GitHub Actions"
+            git config --global user.email "actions@github.com"
+            git add found_keys.log
+            git commit -m "New key found on $TIMESTAMP"
+            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+
+            # Send Email Notification
+            echo "New Key Found: $(grep 'Hit! Private Key:' ../keyhunt_output.log)" | mail -s "New Key Found!" g98655545@gmail.com
+            
+            # Clean Up
+            rm ../keyhunt_output.log
+          fi
