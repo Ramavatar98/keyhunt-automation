@@ -22,7 +22,7 @@ jobs:
       - name: Run KeyHunt and Check for Private Key
         run: |
           cd keyhunt-
-          ./keyhunt -m bsgs -f tests/125.txt -b 135 -k 2048 -q -t 8 -s 10 -S | tee ../keyhunt_output.log
+          ./keyhunt -m bsgs -f tests/125.txt -r 4000000000000000000000000000000000:7fffffffffffffffffffffffffffffffff -k 2048 -q -t 8 -s 10 -S | tee ../keyhunt_output.log
 
           # Check if Key Found
           if grep -q "Hit! Private Key:" ../keyhunt_output.log; then
